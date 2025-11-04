@@ -81,34 +81,34 @@ class GameBoard {
 
 }
 
+class PlayerManager {
+  constructor() {
+    this.player1 = {name: "Player 1", symbol: GAME_STATE.X};
+    this.player2 = {name: "Player 2", symbol: GAME_STATE.O};
+  }
+
+  getPlayer1() {
+    return this.player1;
+  }
+  getPlayer2() {
+    return this.player2;
+  }
+  getPlayer1Name() {
+    return this.player1.name;
+  }
+  getPlayer2Name() {  
+    return this.player2.name;
+  }
+  setPlayer1Name(newName) {
+    this.player1.name = newName;
+  }
+  setPlayer2Name(newName) {
+    this.player2.name = newName;
+  }
+}
+
 const gameBoard = new GameBoard();
-
-const playerManager = (function () {
-  const createPlayer = (name, symbol) => {
-    const player = {name, symbol};
-    player.setName = (newName) => {
-      player.name = newName;
-    }
-    return player;
-  }
-
-  const player1 = createPlayer("Player 1", GAME_STATE.X);
-  const player2 = createPlayer("Player 2", GAME_STATE.O);
-
-  const getPlayer1 = () => player1;
-  const getPlayer2 = () => player2;
-  const getPlayer1Name = () => player1.name;
-  const getPlayer2Name = () => player2.name;
-
-  const setPlayer1Name = (newName) => {
-    player1.setName(newName);
-  }
-  const setPlayer2Name = (newName) => {
-    player2.setName(newName);
-  }
-
-  return {getPlayer1, getPlayer2, getPlayer1Name, getPlayer2Name, setPlayer1Name, setPlayer2Name};
-})();
+const playerManager = new PlayerManager();
 
 const displayController = (function () {
   const boardContainer = document.querySelector(".board");
