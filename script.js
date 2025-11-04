@@ -133,10 +133,10 @@ class GameManager {
   resetGame() {
     this.gameState = RESULT_STATE.IN_PROGRESS;
     this.currentPlayer = 0;
-    gameBoard.resetBoard();
-    displayController.updateCurrentPlayer(playerManager.getPlayer1Name());
-    displayController.updateBoard(gameBoard.boardState);
-    gameBoard.printBoard();
+    this.gameBoard.resetBoard();
+    this.displayController.updateCurrentPlayer(this.playerManager.getPlayer1Name());
+    this.displayController.updateBoard(this.gameBoard.boardState);
+    this.gameBoard.printBoard();
   }
   makeMove = (x, y) => {
     if (this.gameState !== RESULT_STATE.IN_PROGRESS) {
