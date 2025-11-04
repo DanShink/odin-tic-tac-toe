@@ -22,157 +22,163 @@ const winningCombinations = [
   [2, 4, 6],
 ]
 
-const gameBoard = (function () {
-  const boardState = new Array(9).fill(GAME_STATE.EMPTY);
-
-  const resetBoard = () => {
-    boardState.fill(GAME_STATE.EMPTY);
+class GameBoard {
+  constructor() {
+    this.boardState = new Array(9).fill(GAME_STATE.EMPTY);
   }
 
-  const getTileContent = (x, y) => {
-    return boardState[x + y * 3]
+  resetBoard() {
+    this.boardState.fill(GAME_STATE.EMPTY);
   }
 
-  const getTileContentByIndex = (x) => {
-    return boardState[x];
+  getTileContent(x, y) {
+    return this.boardState[x + y * 3];
   }
 
-  const checkWinner = () => {
+  getTileContentByIndex(x) {
+    return this.boardState[x];
+  }
+
+  getBoardState() {
+    return this.boardState;
+  }
+
+  checkWinner() {
     for (const combination of winningCombinations) {
       const [a, b, c] = combination;
-      if (getTileContentByIndex(a) === getTileContentByIndex(b) && getTileContentByIndex(b) === getTileContentByIndex(c) && getTileContentByIndex(a) !== GAME_STATE.EMPTY) {
-        if (getTileContentByIndex(a) === GAME_STATE.X) {
+      if (this.getTileContentByIndex(a) === this.getTileContentByIndex(b) && this.getTileContentByIndex(b) === this.getTileContentByIndex(c) && this.getTileContentByIndex(a) !== GAME_STATE.EMPTY) {
+        if (this.getTileContentByIndex(a) === GAME_STATE.X) {
           return RESULT_STATE.X_WIN;
         } else {
           return RESULT_STATE.O_WIN;
         }
       }
     }
-    if (boardState.every(tile => tile !== GAME_STATE.EMPTY)) {
+    if (this.boardState.every(tile => tile !== GAME_STATE.EMPTY)) {
       return RESULT_STATE.DRAW;
     }
     return RESULT_STATE.IN_PROGRESS;
   }
 
-  const printBoard = () => {
+  printBoard() {
     console.log(`
-      ${boardState[0]} | ${boardState[1]} | ${boardState[2]}
+      ${this.boardState[0]} | ${this.boardState[1]} | ${this.boardState[2]}
       ---------
-      ${boardState[3]} | ${boardState[4]} | ${boardState[5]}
+      ${this.boardState[3]} | ${this.boardState[4]} | ${this.boardState[5]}
       ---------
-      ${boardState[6]} | ${boardState[7]} | ${boardState[8]}
+      ${this.boardState[6]} | ${this.boardState[7]} | ${this.boardState[8]}
     `);
   }
 
-  const makeMove = (x, y, symbol) => {
-    if (getTileContent(x, y) !== GAME_STATE.EMPTY) {
+  makeMove(x, y, symbol) {
+    if (this.getTileContent(x, y) !== GAME_STATE.EMPTY) {
       return false;
     }
-    boardState[x + y * 3] = symbol;
-    printBoard();
+    this.boardState[x + y * 3] = symbol;
+    this.printBoard();
     return true;
   }
 
-  return {boardState, resetBoard, getTileContent, makeMove, checkWinner, printBoard};
-})();
+}
 
-const playerManager = (function () {
-  const createPlayer = (name, symbol) => {
-    const player = {name, symbol};
-    player.setName = (newName) => {
-      player.name = newName;
-    }
-    return player;
+class PlayerManager {
+  constructor() {
+    this.player1 = {name: "Player 1", symbol: GAME_STATE.X};
+    this.player2 = {name: "Player 2", symbol: GAME_STATE.O};
   }
 
-  const player1 = createPlayer("Player 1", GAME_STATE.X);
-  const player2 = createPlayer("Player 2", GAME_STATE.O);
-
-  const getPlayer1 = () => player1;
-  const getPlayer2 = () => player2;
-  const getPlayer1Name = () => player1.name;
-  const getPlayer2Name = () => player2.name;
-
-  const setPlayer1Name = (newName) => {
-    player1.setName(newName);
+  getPlayer1() {
+    return this.player1;
   }
-  const setPlayer2Name = (newName) => {
-    player2.setName(newName);
+  getPlayer2() {
+    return this.player2;
   }
+  getPlayer1Name() {
+    return this.player1.name;
+  }
+  getPlayer2Name() {  
+    return this.player2.name;
+  }
+  setPlayer1Name(newName) {
+    this.player1.name = newName;
+  }
+  setPlayer2Name(newName) {
+    this.player2.name = newName;
+  }
+}
 
-  return {getPlayer1, getPlayer2, getPlayer1Name, getPlayer2Name, setPlayer1Name, setPlayer2Name};
-})();
-
-const displayController = (function () {
-  const boardContainer = document.querySelector(".board");
-  const updateBoard = (boardState) => {
-    boardContainer.querySelectorAll(".tile").forEach((tile, index) => {
+class DisplayController {
+  constructor() {
+    this.boardContainer = document.querySelector(".board");
+    this.currentPlayerContainer = document.getElementById("current-player-name");
+  }
+  updateBoard(boardState) {
+    this.boardContainer.querySelectorAll(".tile").forEach((tile, index) => {
       tile.textContent = boardState[index];
     });
   }
-
-  const updateCurrentPlayer = (currentPlayer) => {
-    document.getElementById("current-player-name").textContent = currentPlayer;
+  updateCurrentPlayer(currentPlayer) {
+    this.currentPlayerContainer.textContent = currentPlayer;
   }
+}
 
-  return {updateBoard, updateCurrentPlayer};
-})();
-
-const gameManager = (function () {
-  let gameState = RESULT_STATE.IN_PROGRESS;
-  let currentPlayer = 0;
-
-  const resetGame = () => {
-    gameState = RESULT_STATE.IN_PROGRESS;
+class GameManager {
+  constructor() {
+    this.gameBoard = new GameBoard();
+    this.playerManager = new PlayerManager();
+    this.displayController = new DisplayController();
+    this.gameState = RESULT_STATE.IN_PROGRESS;
+    this.currentPlayer = 0;
+  }
+  resetGame() {
+    this.gameState = RESULT_STATE.IN_PROGRESS;
+    this.currentPlayer = 0;
     gameBoard.resetBoard();
-    currentPlayer = 0;
     displayController.updateCurrentPlayer(playerManager.getPlayer1Name());
     displayController.updateBoard(gameBoard.boardState);
     gameBoard.printBoard();
   }
-
-  const makeMove = (x, y) => {
-    if (gameState !== RESULT_STATE.IN_PROGRESS) {
+  makeMove = (x, y) => {
+    if (this.gameState !== RESULT_STATE.IN_PROGRESS) {
       return;
     }
-    if (gameBoard.makeMove(x, y, currentPlayer === 0 ? playerManager.getPlayer1().symbol : playerManager.getPlayer2().symbol)) {
-      displayController.updateBoard(gameBoard.boardState);
-      currentPlayer = (currentPlayer + 1) % 2;
-      displayController.updateCurrentPlayer(currentPlayer === 0 ? playerManager.getPlayer1Name() : playerManager.getPlayer2Name());
-      gameState = gameBoard.checkWinner();
-      if (gameState !== RESULT_STATE.IN_PROGRESS) {
-        if (gameState === RESULT_STATE.DRAW) {
+    if (this.gameBoard.makeMove(x, y, this.currentPlayer === 0 ? this.playerManager.getPlayer1().symbol : this.playerManager.getPlayer2().symbol)) {
+      this.displayController.updateBoard(this.gameBoard.boardState);
+      this.currentPlayer = (this.currentPlayer + 1) % 2;
+      this.displayController.updateCurrentPlayer(this.currentPlayer === 0 ? this.playerManager.getPlayer1Name() : this.playerManager.getPlayer2Name());
+      this.gameState = this.gameBoard.checkWinner();
+      if (this.gameState !== RESULT_STATE.IN_PROGRESS) {
+        if (this.gameState === RESULT_STATE.DRAW) {
           console.log("Draw!");
           alert("Draw!");
           return;
         } 
-        const winner = gameState === RESULT_STATE.X_WIN ? playerManager.getPlayer1Name() : playerManager.getPlayer2Name();
+        const winner = this.gameState === RESULT_STATE.X_WIN ? this.playerManager.getPlayer1Name() : this.playerManager.getPlayer2Name();
         console.log(`${winner} wins!`);
         alert(`${winner} wins!`);
         return;
       }
     }
   }
-
-  const getCurrentPlayer = () => {
-    return currentPlayer === 0 ? playerManager.getPlayer1Name() : playerManager.getPlayer2Name();
+  getCurrentPlayer = () => {
+    return this.currentPlayer === 0 ? this.playerManager.getPlayer1Name() : this.playerManager.getPlayer2Name();
   }
 
-  const setPlayer1Name = (newName) => {
-    if (currentPlayer === 0) {
-      displayController.updateCurrentPlayer(newName);
+  setPlayer1Name = (newName) => {
+    if (this.currentPlayer === 0) {
+      this.displayController.updateCurrentPlayer(newName);
     }
-    playerManager.setPlayer1Name(newName);
+    this.playerManager.setPlayer1Name(newName);
   }
-  const setPlayer2Name = (newName) => {
-    if (currentPlayer === 1) {
-      displayController.updateCurrentPlayer(newName);
+  setPlayer2Name = (newName) => {
+    if (this.currentPlayer === 1) {
+      this.displayController.updateCurrentPlayer(newName);
     }
-    playerManager.setPlayer2Name(newName);
+    this.playerManager.setPlayer2Name(newName);
   }
+}
 
-  return {resetGame, makeMove, getCurrentPlayer, setPlayer1Name, setPlayer2Name};
-})();
+const gameManager = new GameManager();
 
 document.querySelectorAll(".tile").forEach((tile) => {
   tile.addEventListener("click", (event) => {
