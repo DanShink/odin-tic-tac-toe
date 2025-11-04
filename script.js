@@ -22,59 +22,66 @@ const winningCombinations = [
   [2, 4, 6],
 ]
 
-const gameBoard = (function () {
-  const boardState = new Array(9).fill(GAME_STATE.EMPTY);
-
-  const resetBoard = () => {
-    boardState.fill(GAME_STATE.EMPTY);
+class GameBoard {
+  constructor() {
+    this.boardState = new Array(9).fill(GAME_STATE.EMPTY);
   }
 
-  const getTileContent = (x, y) => {
-    return boardState[x + y * 3]
+  resetBoard() {
+    this.boardState.fill(GAME_STATE.EMPTY);
   }
 
-  const getTileContentByIndex = (x) => {
-    return boardState[x];
+  getTileContent(x, y) {
+    return this.boardState[x + y * 3];
   }
 
-  const checkWinner = () => {
+  getTileContentByIndex(x) {
+    return this.boardState[x];
+  }
+
+  getBoardState() {
+    return this.boardState;
+  }
+
+  checkWinner() {
     for (const combination of winningCombinations) {
       const [a, b, c] = combination;
-      if (getTileContentByIndex(a) === getTileContentByIndex(b) && getTileContentByIndex(b) === getTileContentByIndex(c) && getTileContentByIndex(a) !== GAME_STATE.EMPTY) {
-        if (getTileContentByIndex(a) === GAME_STATE.X) {
+      if (this.getTileContentByIndex(a) === this.getTileContentByIndex(b) && this.getTileContentByIndex(b) === this.getTileContentByIndex(c) && this.getTileContentByIndex(a) !== GAME_STATE.EMPTY) {
+        if (this.getTileContentByIndex(a) === GAME_STATE.X) {
           return RESULT_STATE.X_WIN;
         } else {
           return RESULT_STATE.O_WIN;
         }
       }
     }
-    if (boardState.every(tile => tile !== GAME_STATE.EMPTY)) {
+    if (this.boardState.every(tile => tile !== GAME_STATE.EMPTY)) {
       return RESULT_STATE.DRAW;
     }
     return RESULT_STATE.IN_PROGRESS;
   }
 
-  const printBoard = () => {
+  printBoard() {
     console.log(`
-      ${boardState[0]} | ${boardState[1]} | ${boardState[2]}
+      ${this.boardState[0]} | ${this.boardState[1]} | ${this.boardState[2]}
       ---------
-      ${boardState[3]} | ${boardState[4]} | ${boardState[5]}
+      ${this.boardState[3]} | ${this.boardState[4]} | ${this.boardState[5]}
       ---------
-      ${boardState[6]} | ${boardState[7]} | ${boardState[8]}
+      ${this.boardState[6]} | ${this.boardState[7]} | ${this.boardState[8]}
     `);
   }
 
-  const makeMove = (x, y, symbol) => {
-    if (getTileContent(x, y) !== GAME_STATE.EMPTY) {
+  makeMove(x, y, symbol) {
+    if (this.getTileContent(x, y) !== GAME_STATE.EMPTY) {
       return false;
     }
-    boardState[x + y * 3] = symbol;
-    printBoard();
+    this.boardState[x + y * 3] = symbol;
+    this.printBoard();
     return true;
   }
 
-  return {boardState, resetBoard, getTileContent, makeMove, checkWinner, printBoard};
-})();
+}
+
+const gameBoard = new GameBoard();
 
 const playerManager = (function () {
   const createPlayer = (name, symbol) => {
