@@ -122,65 +122,63 @@ class DisplayController {
   }
 }
 
-const gameBoard = new GameBoard();
-const playerManager = new PlayerManager();
-const displayController = new DisplayController();
-
-const gameManager = (function () {
-  let gameState = RESULT_STATE.IN_PROGRESS;
-  let currentPlayer = 0;
-
-  const resetGame = () => {
-    gameState = RESULT_STATE.IN_PROGRESS;
+class GameManager {
+  constructor() {
+    this.gameBoard = new GameBoard();
+    this.playerManager = new PlayerManager();
+    this.displayController = new DisplayController();
+    this.gameState = RESULT_STATE.IN_PROGRESS;
+    this.currentPlayer = 0;
+  }
+  resetGame() {
+    this.gameState = RESULT_STATE.IN_PROGRESS;
+    this.currentPlayer = 0;
     gameBoard.resetBoard();
-    currentPlayer = 0;
     displayController.updateCurrentPlayer(playerManager.getPlayer1Name());
     displayController.updateBoard(gameBoard.boardState);
     gameBoard.printBoard();
   }
-
-  const makeMove = (x, y) => {
-    if (gameState !== RESULT_STATE.IN_PROGRESS) {
+  makeMove = (x, y) => {
+    if (this.gameState !== RESULT_STATE.IN_PROGRESS) {
       return;
     }
-    if (gameBoard.makeMove(x, y, currentPlayer === 0 ? playerManager.getPlayer1().symbol : playerManager.getPlayer2().symbol)) {
-      displayController.updateBoard(gameBoard.boardState);
-      currentPlayer = (currentPlayer + 1) % 2;
-      displayController.updateCurrentPlayer(currentPlayer === 0 ? playerManager.getPlayer1Name() : playerManager.getPlayer2Name());
-      gameState = gameBoard.checkWinner();
-      if (gameState !== RESULT_STATE.IN_PROGRESS) {
-        if (gameState === RESULT_STATE.DRAW) {
+    if (this.gameBoard.makeMove(x, y, this.currentPlayer === 0 ? this.playerManager.getPlayer1().symbol : this.playerManager.getPlayer2().symbol)) {
+      this.displayController.updateBoard(this.gameBoard.boardState);
+      this.currentPlayer = (this.currentPlayer + 1) % 2;
+      this.displayController.updateCurrentPlayer(this.currentPlayer === 0 ? this.playerManager.getPlayer1Name() : this.playerManager.getPlayer2Name());
+      this.gameState = this.gameBoard.checkWinner();
+      if (this.gameState !== RESULT_STATE.IN_PROGRESS) {
+        if (this.gameState === RESULT_STATE.DRAW) {
           console.log("Draw!");
           alert("Draw!");
           return;
         } 
-        const winner = gameState === RESULT_STATE.X_WIN ? playerManager.getPlayer1Name() : playerManager.getPlayer2Name();
+        const winner = this.gameState === RESULT_STATE.X_WIN ? this.playerManager.getPlayer1Name() : this.playerManager.getPlayer2Name();
         console.log(`${winner} wins!`);
         alert(`${winner} wins!`);
         return;
       }
     }
   }
-
-  const getCurrentPlayer = () => {
-    return currentPlayer === 0 ? playerManager.getPlayer1Name() : playerManager.getPlayer2Name();
+  getCurrentPlayer = () => {
+    return this.currentPlayer === 0 ? this.playerManager.getPlayer1Name() : this.playerManager.getPlayer2Name();
   }
 
-  const setPlayer1Name = (newName) => {
-    if (currentPlayer === 0) {
-      displayController.updateCurrentPlayer(newName);
+  setPlayer1Name = (newName) => {
+    if (this.currentPlayer === 0) {
+      this.displayController.updateCurrentPlayer(newName);
     }
-    playerManager.setPlayer1Name(newName);
+    this.playerManager.setPlayer1Name(newName);
   }
-  const setPlayer2Name = (newName) => {
-    if (currentPlayer === 1) {
-      displayController.updateCurrentPlayer(newName);
+  setPlayer2Name = (newName) => {
+    if (this.currentPlayer === 1) {
+      this.displayController.updateCurrentPlayer(newName);
     }
-    playerManager.setPlayer2Name(newName);
+    this.playerManager.setPlayer2Name(newName);
   }
+}
 
-  return {resetGame, makeMove, getCurrentPlayer, setPlayer1Name, setPlayer2Name};
-})();
+const gameManager = new GameManager();
 
 document.querySelectorAll(".tile").forEach((tile) => {
   tile.addEventListener("click", (event) => {
