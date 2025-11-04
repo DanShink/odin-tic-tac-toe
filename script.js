@@ -107,23 +107,24 @@ class PlayerManager {
   }
 }
 
-const gameBoard = new GameBoard();
-const playerManager = new PlayerManager();
-
-const displayController = (function () {
-  const boardContainer = document.querySelector(".board");
-  const updateBoard = (boardState) => {
-    boardContainer.querySelectorAll(".tile").forEach((tile, index) => {
+class DisplayController {
+  constructor() {
+    this.boardContainer = document.querySelector(".board");
+    this.currentPlayerContainer = document.getElementById("current-player-name");
+  }
+  updateBoard(boardState) {
+    this.boardContainer.querySelectorAll(".tile").forEach((tile, index) => {
       tile.textContent = boardState[index];
     });
   }
-
-  const updateCurrentPlayer = (currentPlayer) => {
-    document.getElementById("current-player-name").textContent = currentPlayer;
+  updateCurrentPlayer(currentPlayer) {
+    this.currentPlayerContainer.textContent = currentPlayer;
   }
+}
 
-  return {updateBoard, updateCurrentPlayer};
-})();
+const gameBoard = new GameBoard();
+const playerManager = new PlayerManager();
+const displayController = new DisplayController();
 
 const gameManager = (function () {
   let gameState = RESULT_STATE.IN_PROGRESS;
