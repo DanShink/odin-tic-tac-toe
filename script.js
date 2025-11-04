@@ -18,6 +18,8 @@ const winningCombinations = [
   [0, 3, 6],
   [1, 4, 7],
   [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
 ]
 
 const gameBoard = (function () {
@@ -76,10 +78,11 @@ const gameBoard = (function () {
 
 const playerManager = (function () {
   const createPlayer = (name, symbol) => {
-    const setName = (newName) => {
-      name = newName;
+    const player = {name, symbol};
+    player.setName = (newName) => {
+      player.name = newName;
     }
-    return {name, symbol, setName};
+    return player;
   }
 
   const player1 = createPlayer("Player 1", GAME_STATE.X);
@@ -87,6 +90,8 @@ const playerManager = (function () {
 
   const getPlayer1 = () => player1;
   const getPlayer2 = () => player2;
+  const getPlayer1Name = () => player1.name;
+  const getPlayer2Name = () => player2.name;
 
   const setPlayer1Name = (newName) => {
     player1.setName(newName);
@@ -95,14 +100,7 @@ const playerManager = (function () {
     player2.setName(newName);
   }
 
-  const resetPlayers = () => {
-    const player1Name = document.getElementById("player1-name").textContent;
-    const player2Name = document.getElementById("player2-name").textContent;
-    setPlayer1Name(player1Name);
-    setPlayer2Name(player2Name);
-  }
-
-  return {getPlayer1, getPlayer2, setPlayer1Name, setPlayer2Name, resetPlayers};
+  return {getPlayer1, getPlayer2, getPlayer1Name, getPlayer2Name, setPlayer1Name, setPlayer2Name};
 })();
 
 const displayController = (function () {
@@ -113,7 +111,11 @@ const displayController = (function () {
     });
   }
 
-  return {updateBoard};
+  const updateCurrentPlayer = (currentPlayer) => {
+    document.getElementById("current-player-name").textContent = currentPlayer;
+  }
+
+  return {updateBoard, updateCurrentPlayer};
 })();
 
 const gameManager = (function () {
@@ -124,7 +126,7 @@ const gameManager = (function () {
     gameState = RESULT_STATE.IN_PROGRESS;
     gameBoard.resetBoard();
     currentPlayer = 0;
-    playerManager.resetPlayers();
+    displayController.updateCurrentPlayer(playerManager.getPlayer1Name());
     displayController.updateBoard(gameBoard.boardState);
     gameBoard.printBoard();
   }
@@ -134,21 +136,48 @@ const gameManager = (function () {
       return;
     }
     if (gameBoard.makeMove(x, y, currentPlayer === 0 ? playerManager.getPlayer1().symbol : playerManager.getPlayer2().symbol)) {
-      currentPlayer = (currentPlayer + 1) % 2;
       displayController.updateBoard(gameBoard.boardState);
+      currentPlayer = (currentPlayer + 1) % 2;
+      displayController.updateCurrentPlayer(currentPlayer === 0 ? playerManager.getPlayer1Name() : playerManager.getPlayer2Name());
       gameState = gameBoard.checkWinner();
       if (gameState !== RESULT_STATE.IN_PROGRESS) {
         if (gameState === RESULT_STATE.DRAW) {
           console.log("Draw!");
+          alert("Draw!");
           return;
         } 
-        const winner = gameState === RESULT_STATE.X_WIN ? playerManager.getPlayer1().name : playerManager.getPlayer2().name;
+        const winner = gameState === RESULT_STATE.X_WIN ? playerManager.getPlayer1Name() : playerManager.getPlayer2Name();
         console.log(`${winner} wins!`);
+        alert(`${winner} wins!`);
         return;
       }
     }
   }
 
-  return {resetGame, makeMove};
+  const getCurrentPlayer = () => {
+    return currentPlayer === 0 ? playerManager.getPlayer1Name() : playerManager.getPlayer2Name();
+  }
+
+  const setPlayer1Name = (newName) => {
+    if (currentPlayer === 0) {
+      displayController.updateCurrentPlayer(newName);
+    }
+    playerManager.setPlayer1Name(newName);
+  }
+  const setPlayer2Name = (newName) => {
+    if (currentPlayer === 1) {
+      displayController.updateCurrentPlayer(newName);
+    }
+    playerManager.setPlayer2Name(newName);
+  }
+
+  return {resetGame, makeMove, getCurrentPlayer, setPlayer1Name, setPlayer2Name};
 })();
 
+document.querySelectorAll(".tile").forEach((tile) => {
+  tile.addEventListener("click", (event) => {
+    const x = parseInt(event.target.dataset.x);
+    const y = parseInt(event.target.dataset.y);
+    gameManager.makeMove(x, y);
+  });
+});

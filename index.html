@@ -23,19 +23,20 @@
       <div class="tile" data-x="1" data-y="2"></div>
       <div class="tile" data-x="2" data-y="2"></div>
     </div>
+    <div class="current-player" id="current-player">Current Player: <span id="current-player-name">Player 1</span></div>
     <div class="player-info">
       <div class="player-info-item">
-        <div class="player-info-item-name" id="player1-name">Player 1</div>
-        <div class="player-info-item-symbol">X</div>
+        <span class="player-info-item-symbol">X</span>
+        <input type="text" id="player1-name" value="Player 1" onchange="gameManager.setPlayer1Name(event.target.value)">
       </div>
       <div class="player-info-item">
-        <div class="player-info-item-name" id="player2-name">Player 2</div>
-        <div class="player-info-item-symbol">O</div>
+        <span class="player-info-item-symbol">O</span>
+        <input type="text" id="player2-name" value="Player 2" onchange="gameManager.setPlayer2Name(event.target.value)">
       </div>
     </div>
   </div>
   <div class="footer">
-    <button class="reset-button">Reset Game</button>
+    <button class="reset-button" onclick="gameManager.resetGame()">Reset Game</button>
   </div>
 </body>
 </html>
